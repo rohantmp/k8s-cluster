@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: volcreator
+spec:
+  template:
+    metadata:
+      name: volcreator
+    spec:
+      containers:
+      - name: volcreator
+        image: johnstrunk/volcreator
+        args:
+        - "192.168.173.15:192.168.173.16:192.168.173.17"
+        - "testvol"
+        - "/data"
+        - "0"
+        - "100"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      restartPolicy: Never
+      volumes:
+      - name: data
+        glusterfs:
+          endpoints: glusterfs-cluster
+          path: testvol
+          readOnly: false
