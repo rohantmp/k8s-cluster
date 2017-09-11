@@ -2,14 +2,17 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: volcreator
+  namespace: glusterfs
 spec:
   template:
     metadata:
       name: volcreator
     spec:
+      serviceAccountName: volcreator-sa
       containers:
       - name: volcreator
-        image: johnstrunk/volcreator
+        image: johnstrunk/volcreator:latest
+        #entrypoint: /bin/bash
         args:
         - "192.168.173.15:192.168.173.16:192.168.173.17"
         - "testvol"
