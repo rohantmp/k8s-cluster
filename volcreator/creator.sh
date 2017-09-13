@@ -54,11 +54,17 @@ function kube_cmd() {
         $*
 }
 
-servers=$1
+endpoint_name=$1
 volume_name=$2
 base_path=$3
 declare -i i=$4
 declare -i i_end=$5
+
+servers=$(kube_cmd get ep/$endpoint_name -o jsonpath='{.subsets[*].addresses[*].ip}' | tr ' ' ':')
+if [ $? != 0 ]; then
+    echo "Unable to retrieve IPs for ep/$endpoint_name. Aborting."
+    exit 1
+fi
 
 if [ $# -ne 5 ]; then usage; exit 1; fi
 if [ $i -lt 0 ]; then usage; exit 1; fi
@@ -87,13 +93,13 @@ while [ $i -le $i_end ]; do
         exit 2
     fi
     mkPvTemplate $servers $volume_name $subdir "1Gi" >> $base_path/pvs.yml
-    kube_cmd -n glusterfs exec -it $gpod gluster volume quota $volume_name limit-usage /$subdir 1GB
+    kube_cmd -n glusterfs exec $gpod gluster volume quota $volume_name limit-usage /$subdir 1GB
     if [ $? != 0 ]; then
         echo -n "Unable to set gluster quota. "
         echo "pod=$gpod vol=$volume_name subdir=$subdir"
         exit 2
     fi
-    mkPvTemplate $servers $volume_name $subdir "1Gi" | kube_cmd create -f -
+    mkPvTemplate $servers $volume_name $subdir "1Gi" | kube_cmd apply -f -
     if [ $? != 0 ]; then
         echo "Unable to create PV"
         exit 2
