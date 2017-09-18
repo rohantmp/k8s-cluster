@@ -83,6 +83,13 @@ if [ $? != 0 ]; then
     echo "Failed enabling quotas on the volume... continuing anyway."
 fi
 
+#-- df on a directory should report remaining quota allowance,
+#-- not volume free space.
+kube_cmd -n glusterfs exec $gpod gluster volume set $volume_name quota-deem-statfs on
+if [ $? != 0 ]; then
+    echo "Failed setting df space reporting volume option... continuing anyway."
+fi
+
 while [ $i -le $i_end ]; do
     subdir="$(tohexpath $i)"
     dir="$base_path/$subdir"
