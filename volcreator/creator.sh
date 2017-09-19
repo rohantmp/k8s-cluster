@@ -94,9 +94,14 @@ while [ $i -le $i_end ]; do
     subdir="$(tohexpath $i)"
     dir="$base_path/$subdir"
     echo "creating: $dir ($i/$i_end)"
-    mkdir -p $dir 
+    mkdir -p $dir
     if [ $? != 0 ]; then
         echo "Unable to create $dir"
+        exit 2
+    fi
+    chmod 777 $dir
+    if [ $? != 0 ]; then
+        echo "Unable to set permissions on $dir"
         exit 2
     fi
     mkPvTemplate $servers $volume_name $subdir "1Gi" >> $base_path/pvs.yml
