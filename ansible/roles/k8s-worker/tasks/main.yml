@@ -5,14 +5,19 @@
           --token {{ k8s_init_token }}
           --discovery-token-unsafe-skip-ca-verification master:6443
 
-- name: Add feature gates to kubelet
-  lineinfile:
-    path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    line: >
-      Environment="KUBELET_EXTRA_ARGS=
-      --feature-gates={{ feature_gates|join(',') }}"
-    insertafter: "^Environment="
-    state: present
+- block:
+  - shell: systemctl cat kubelet|grep 10-kubeadm.conf|awk '{ print $2 }'
+    register: shell_out
+  - set_fact:
+      kubeadm_dropin: '{{ shell_out.stdout }}'
+  - name: Add feature gates to kubelet
+    lineinfile:
+      path: '{{ kubeadm_dropin }}'
+      line: >
+        Environment="KUBELET_EXTRA_ARGS=
+        --feature-gates={{ feature_gates|join(',') }}"
+      insertafter: "^Environment="
+      state: present
 
 - name: Restart kubelet
   systemd:
