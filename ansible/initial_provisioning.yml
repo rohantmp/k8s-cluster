@@ -72,3 +72,6 @@
                   --kubeconfig=../kubeconfig
                   --service-account tiller
       when: which_helm.rc == 0
+
+- name: Docker image reg
+  include: pull_rook.yaml

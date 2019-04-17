@@ -1,0 +1,14 @@
+---
+- name: Cleanup VM disks
+  hosts: workers
+  become: yes
+  gather_facts: no
+  tasks:
+    - package:
+        name: gdisk
+        state: latest
+    - shell: sgdisk --zap-all {{ item }}
+      with_items:
+        - /dev/vdb
+        - /dev/vdc
+    - shell: rm -rf /var/lib/rook

@@ -1,0 +1,28 @@
+---
+- name: Setup local registry
+  hosts: localhost
+  gather_facts: yes
+  become: yes
+  tasks:
+    - docker_container:
+        detach: yes
+        published_ports:
+          - 5000:5000
+        name: registry
+        image: registry:2
+        restart_policy: always
+        state: present
+      register: registry_yaml
+    - set_face:
+        local_registry: '{{ ansible_default_ipv4.address }}'
+
+- name: Pull rook images from local registry to vagrant
+  hosts: all
+  become: yes
+  tasks:
+    - template:
+        src: daemon.json.j2
+        dest: /etc/docker/daemon.json	
+    - service:
+        name: docker
+        state: restarted
