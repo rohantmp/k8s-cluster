@@ -1,0 +1,31 @@
+---
+#- name: Cleanup rook resources
+# hosts: localhost
+# gather_facts: no  
+# tasks:
+#   - k8s_raw
+
+- name: Cleanup VM disks
+  hosts: workers
+  become: yes
+  gather_facts: no
+  tasks:
+    - package:
+        name: gdisk
+        state: latest
+    - shell: 'sgdisk --zap-all {{ item }}'
+      with_items: 
+        - /dev/vdb
+        - /dev/vdc
+    
+    - shell: "dmsetup ls|grep ceph|awk '{ print $1 }'|xargs dmsetup remove"
+      register: return
+      failed_when: return.rc != 0 and return.stderr_lines[0] !=  "No device specified."
+- name: Cleanup dataDirHostPat
+  hosts: all
+  become: yes
+  gather_facts: no  
+  tasks:
+    - file:
+        state: absent
+        path: /var/lib/rook
