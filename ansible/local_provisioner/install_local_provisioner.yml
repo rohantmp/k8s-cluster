@@ -6,7 +6,7 @@
     - name: Create /dev/vd* ==> /dev/kube_blk_devs/vd* udev rule
       copy:
         content: >
-                KERNEL=="vd[b-z]*",
+                KERNEL=="vd[c-z]*",
                 SUBSYSTEM=="block",
                 SYMLINK+="kube_blk_devs/%k"
         dest: /etc/udev/rules.d/90-hdd-links.rules

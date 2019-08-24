@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 WORKERS = 3
-DISKS = 2
-DISKSIZE = "30G"
+DISKS = 3
+DISKSIZE = "90G"
 
 Vagrant.configure("2") do |config|
   #config.vm.box = "fedora/26-cloud-base"
